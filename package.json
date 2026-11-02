@@ -1,0 +1,7 @@
+{
+  "name": "dipesh-portfolio-studio",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "dev": "node server.mjs", "preview": "node server.mjs", "check": "node --check dist/app.js && node --check dist/scene.js && node --check dist/projects.js" }
+}

@@ -1,0 +1,68 @@
+const { chromium } = require('C:/Users/Dipesh Mishra/Desktop/Projects/Rizzerv/LeadAutomation/node_modules/playwright-core');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+(async()=>{
+  fs.mkdirSync('.qa',{recursive:true});
+  const browser = await chromium.launch({executablePath:'C:/Users/Dipesh Mishra/AppData/Local/ms-playwright/chromium-1223/chrome-win64/chrome.exe',headless:true,args:['--enable-unsafe-swiftshader','--use-angle=swiftshader']});
+  const context=await browser.newContext({viewport:{width:1440,height:1000},permissions:['clipboard-read','clipboard-write']});
+  const page=await context.newPage(); const errors=[]; const missing=[];
+  page.on('pageerror',e=>errors.push(e.message));page.on('response',r=>{if(r.status()>=400)missing.push(r.status()+' '+r.url());});
+  await page.goto('http://127.0.0.1:4175/',{waitUntil:'networkidle'});
+  await page.waitForSelector('#scene[data-ready="true"]',{timeout:30000});
+  await page.getByRole('button',{name:'Pause motion'}).click();
+  assert.equal(await page.locator('#motion-toggle').getAttribute('aria-pressed'),'false');
+  await page.waitForTimeout(200);
+  await page.screenshot({path:'.qa/desktop.png',fullPage:true});
+  await page.screenshot({path:'.qa/hero.png'});
+  assert.equal(await page.locator('.project-card:visible').count(),6);
+  await page.getByRole('button',{name:'AI & tools',exact:true}).click();
+  assert.equal(await page.locator('.project-card:visible').count(),3);
+  await page.getByRole('button',{name:'Creative tech',exact:true}).click();
+  assert.equal(await page.locator('.project-card:visible').count(),1);
+  await page.getByRole('button',{name:'All work',exact:false}).click();
+  for (const id of ['rizzerv','beatert','forestverse','meetandmore','karuna','reach']) {
+    await page.locator('.project-cover[data-project="'+id+'"]').click();
+    assert(await page.locator('#project-dialog').isVisible());
+    assert((await page.locator('#dialog-title').textContent()).length>0);
+    assert.match(await page.locator('#dialog-link').getAttribute('href'),/^https:\/\//);
+    await page.keyboard.press('Escape');
+    assert(!(await page.locator('#project-dialog').isVisible()));
+    assert.equal(await page.evaluate(()=>document.activeElement.dataset.project),id);
+  }
+  await page.getByText('AI that does things',{exact:true}).click();
+  assert.equal(await page.locator('.expertise-list details').nth(1).getAttribute('open'),'');
+  await page.getByRole('button',{name:'Copy email address'}).click();
+  assert.equal(await page.evaluate(()=>navigator.clipboard.readText()),'mavinash422@gmail.com');
+  assert(await page.locator('#copy-status').textContent());
+  for(const width of [320,390,768,1024,1440]){
+    await page.setViewportSize({width,height:900});
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Horizontal overflow at ${width}`);
+  }
+  const mobile=await browser.newPage({viewport:{width:390,height:844},isMobile:true,deviceScaleFactor:1,reducedMotion:'reduce'});
+  mobile.on('pageerror',e=>errors.push(e.message));
+  await mobile.goto('http://127.0.0.1:4175/',{waitUntil:'networkidle'});
+  await mobile.waitForSelector('#scene[data-ready="true"]');
+  assert.equal(await mobile.locator('#motion-toggle').getAttribute('aria-pressed'),'false');
+  await mobile.locator('.forest-art').scrollIntoViewIfNeeded();
+  await mobile.locator('.forest-art img').evaluate(img=>img.decode());
+  await mobile.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+  await mobile.screenshot({path:'.qa/mobile.png',fullPage:true});
+  await mobile.getByRole('button',{name:'Open navigation'}).click();
+  assert.equal(await mobile.locator('.menu-toggle').getAttribute('aria-expanded'),'true');
+  await mobile.locator('#navigation a[href="#about"]').click();
+  assert.equal(await mobile.locator('.menu-toggle').getAttribute('aria-expanded'),'false');
+  await mobile.locator('[data-project="rizzerv"]').first().click();
+  assert(await mobile.locator('#project-dialog').isVisible());
+  await mobile.getByRole('button',{name:'Close project details'}).click();
+  const fallback=await browser.newPage({viewport:{width:390,height:844}});
+  await fallback.route('**/three.module.min.js',route=>route.abort());
+  await fallback.goto('http://127.0.0.1:4175/',{waitUntil:'networkidle'});
+  assert(await fallback.locator('.scene-fallback').isVisible());
+  assert(await fallback.getByRole('link',{name:'Explore my work'}).isVisible());
+  const images=await page.locator('img').evaluateAll(imgs=>imgs.map(i=>({src:i.getAttribute('src'),loaded:i.complete&&i.naturalWidth>0})));
+  assert(images.every(i=>i.loaded),'Broken image');
+  assert.deepEqual(errors,[]);assert.deepEqual(missing,[]);
+  fs.writeFileSync('.qa/result.json',JSON.stringify({passed:true,widths:[320,390,768,1024,1440],errors,missing,images,checks:['WebGL render','motion toggle','project filters','six dialogs and links','Escape and focus restoration','expertise accordion','clipboard','mobile navigation','reduced motion','no WebGL fallback','no horizontal overflow']},null,2));
+  console.log('PASS: desktop/mobile, WebGL, filters, six dialogs, focus return, accordion, clipboard, reduced motion, fallback; no errors or missing assets.');
+  await browser.close();
+})().catch(e=>{console.error(e);process.exit(1)});
