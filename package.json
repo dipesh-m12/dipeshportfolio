@@ -3,5 +3,5 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "scripts": { "dev": "node server.mjs", "preview": "node server.mjs", "check": "node --check dist/app.js && node --check dist/scene.js && node --check dist/projects.js" }
+  "scripts": { "dev": "node server.mjs", "preview": "node server.mjs", "check": "node --check dist/app.js && node --check dist/scene.js && node --check dist/projects.js && node --check dist/contact.js && node --check dist/motion.js" }
 }

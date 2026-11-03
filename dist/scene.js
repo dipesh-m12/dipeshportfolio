@@ -2,6 +2,8 @@
 (async () => {
   const host = document.querySelector('#scene');
   const toggle = document.querySelector('#motion-toggle');
+  const modeToggle = document.querySelector('#scene-mode');
+  const sceneStatus = document.querySelector('#scene-status');
   if (!host) return;
 
   let renderer;
@@ -11,6 +13,8 @@
     host.setAttribute('role', 'img');
     host.setAttribute('aria-label', 'Orange and chrome knot sculpture. Static artwork.');
     host.querySelector('.scene-fallback')?.setAttribute('aria-hidden', 'false');
+    if (modeToggle) modeToggle.disabled = true;
+    if (sceneStatus) sceneStatus.textContent = 'Static sculpture · 3D unavailable on this device';
     if (toggle) {
       toggle.disabled = true;
       toggle.textContent = 'Static artwork';
@@ -100,12 +104,31 @@
     const knotGeometry = new THREE.TorusKnotGeometry(1.14, 0.34, 240, 36, 2, 3);
     const knot = new THREE.Mesh(knotGeometry, orange);
     knotGroup.add(knot);
+    const shellMaterial = orange.clone();
+    shellMaterial.transparent = true;
+    knot.material = shellMaterial;
+    const structureMaterial = new THREE.LineBasicMaterial({ color: 0x71371d, transparent: true, opacity: 0 });
+    const structureGeometry = new THREE.TorusKnotGeometry(1.14, 0.342, 80, 10, 2, 3);
+    const structure = new THREE.LineSegments(new THREE.WireframeGeometry(structureGeometry), structureMaterial);
+    structureGeometry.dispose();
+    structure.visible = false;
+    knotGroup.add(structure);
+    const nodeMaterial = new THREE.MeshStandardMaterial({ color: 0xf34b19, metalness: 0.6, roughness: 0.25, transparent: true, opacity: 0 });
+    const structureNodes = new THREE.Group();
+    structureNodes.visible = false;
+    knotGroup.add(structureNodes);
 
     // Two fitted metal collars follow the knot's centreline.
     const centreAt = (u) => {
       const radial = 1.14 * (2 + Math.cos(1.5 * u)) * 0.5;
       return new THREE.Vector3(radial * Math.cos(u), radial * Math.sin(u), 1.14 * Math.sin(1.5 * u) * 0.5);
     };
+    const nodeGeometry = new THREE.SphereGeometry(0.075, 16, 12);
+    for (let i = 0; i < 20; i++) {
+      const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
+      node.position.copy(centreAt(i / 20 * Math.PI * 4));
+      structureNodes.add(node);
+    }
     for (const u of [2.65, 8.9]) {
       const centre = centreAt(u);
       const direction = centreAt(u + 0.001).sub(centre).normalize();
@@ -156,6 +179,8 @@
     let targetY = 0;
     let autoRotation = 0;
     let contextAvailable = true;
+    let structureTarget = 0;
+    let structureAmount = 0;
 
     const updateToggle = () => {
       if (!toggle) return;
@@ -176,13 +201,20 @@
         autoRotation += delta * 0.085;
       }
       const damping = 1 - Math.exp(-12 * Math.max(delta, 1 / 60));
+      structureAmount = media.matches ? structureTarget : structureAmount + (structureTarget - structureAmount) * damping;
+      shellMaterial.opacity = 1 - structureAmount * 0.94;
+      shellMaterial.depthWrite = structureAmount < 0.5;
+      structureMaterial.opacity = structureAmount * 0.55;
+      nodeMaterial.opacity = structureAmount;
+      structure.visible = structureAmount > 0.001;
+      structureNodes.visible = structure.visible;
       sculpture.rotation.x += (targetX - sculpture.rotation.x) * damping;
       sculpture.rotation.y += (targetY + autoRotation - sculpture.rotation.y) * damping;
       knotGroup.position.y = Math.sin(elapsed * 0.7) * 0.055;
       for (const { sphere, y, phase } of satellites) sphere.position.y = y + Math.sin(elapsed * 0.8 + phase) * 0.06;
       renderer.render(scene, camera);
       const settling = Math.abs(targetX - sculpture.rotation.x) > 0.0005 || Math.abs(targetY + autoRotation - sculpture.rotation.y) > 0.0005;
-      if (playing || dragging || settling) frame = requestAnimationFrame(render);
+      if (playing || dragging || settling || Math.abs(structureTarget - structureAmount) > 0.001) frame = requestAnimationFrame(render);
     };
     const requestRender = () => {
       if (contextAvailable && !frame && visible && !document.hidden) frame = requestAnimationFrame(render);
@@ -214,6 +246,15 @@
       playing = !playing;
       manuallyChosen = true;
       updateToggle();
+      requestRender();
+    });
+    modeToggle?.addEventListener('click', () => {
+      if (!contextAvailable) return;
+      structureTarget = structureTarget ? 0 : 1;
+      host.dataset.mode = structureTarget ? 'structure' : 'sculpture';
+      modeToggle.setAttribute('aria-pressed', String(Boolean(structureTarget)));
+      modeToggle.textContent = structureTarget ? 'Return to sculpture' : 'Explore structure';
+      if (sceneStatus) sceneStatus.textContent = structureTarget ? 'Under the surface · One connected structure' : 'Drag to explore · Arrow keys to rotate';
       requestRender();
     });
     media.addEventListener('change', () => {
@@ -273,6 +314,8 @@
     resize();
     renderer.render(scene, camera);
     host.dataset.ready = 'true';
+    host.dataset.mode = 'sculpture';
+    if (modeToggle) modeToggle.disabled = false;
     host.setAttribute('tabindex', '0');
     host.setAttribute('role', 'img');
     host.setAttribute('aria-label', 'Interactive orange and chrome knot sculpture. Drag or use the arrow keys to rotate. Press Home to reset the view. Use the motion button to pause or play automatic rotation.');

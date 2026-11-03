@@ -23,7 +23,8 @@ document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListen
 
 const dialog=document.querySelector('#project-dialog');
 let lastProjectTrigger=null;
-document.querySelectorAll('[data-project]').forEach(button=>button.addEventListener('click',()=>{
+document.querySelectorAll('[data-project]').forEach(button=>button.addEventListener('click',(event)=>{
+  event.preventDefault();
   const project=projects.find(item=>item.id===button.dataset.project);
   if(!project)return;
   lastProjectTrigger=button;
@@ -34,6 +35,7 @@ document.querySelectorAll('[data-project]').forEach(button=>button.addEventListe
   document.querySelector('#dialog-capabilities').replaceChildren(...project.capabilities.map(text=>{const li=document.createElement('li');li.textContent=text;return li;}));
   document.querySelector('#dialog-stack').replaceChildren(...project.stack.map(text=>{const span=document.createElement('span');span.textContent=text;return span;}));
   const link=document.querySelector('#dialog-link');link.href=project.url;link.textContent=project.linkLabel+' ↗';
+  document.querySelector('#dialog-links').replaceChildren(...(project.links||[]).map(item=>{const a=document.createElement('a');a.href=item.url;a.textContent=item.label+' ↗';a.target='_blank';a.rel='noopener noreferrer';return a;}));
   dialog.showModal();
 }));
 document.querySelector('#close-dialog').addEventListener('click',()=>dialog.close());
@@ -52,3 +54,5 @@ copyButton.addEventListener('click',async()=>{
 const sectionObserver=new IntersectionObserver(entries=>{for(const entry of entries){if(!entry.isIntersecting)continue;nav.querySelectorAll('a').forEach(link=>{if(link.hash==='#'+entry.target.id)link.setAttribute('aria-current','location');else link.removeAttribute('aria-current');});}},{rootMargin:'-20% 0px -55% 0px'});
 document.querySelectorAll('main>section[id]').forEach(section=>sectionObserver.observe(section));
 import('./scene.js').catch(()=>{document.querySelector('#motion-toggle').hidden=true;});
+import('./motion.js').catch(()=>{});
+import('./contact.js').catch(()=>{const status=document.querySelector('#form-status');status.textContent='The form could not load. Please email me directly.';document.querySelector('#send-message').disabled=true;document.querySelector('#email-fallback').hidden=false;});

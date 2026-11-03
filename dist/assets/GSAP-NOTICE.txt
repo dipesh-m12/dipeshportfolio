@@ -1,0 +1,5 @@
+GSAP 3.12.5, Copyright 2008–2024 GreenSock, Inc.
+Vendored from the GSAP package used by Dipesh's original portfolio.
+The original copyright and license notice are retained in gsap.min.js.
+Project: https://gsap.com/
+License information: https://gsap.com/standard-license/

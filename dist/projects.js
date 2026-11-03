@@ -1,17 +1,27 @@
-// Content adapted from Dipesh's existing portfolio and project archive.
-// Keep project claims grounded in those sources; no inferred business metrics.
+// Résumé supplied by Dipesh on 2026-11-03 is authoritative for professional work.
+// Earlier portfolio supplies the additional creative projects. Metrics are user-provided.
 export const projects = [
   {
     id: 'rizzerv',
     title: 'Rizzerv',
     category: 'platforms',
-    eyebrow: 'Salon & stylist marketplace',
+    eyebrow: 'Production multi-tenant booking platform',
     summary: 'From finding the right stylist to running the salon, one connected booking ecosystem.',
-    description: 'Customers need a simple way to discover providers and book salon or at-home appointments. Rizzerv connects that experience to the tools behind the business: vendor calendars, walk-in billing, staff management, subscriptions, and reporting. A mobile app, web dashboards, and domain-based microservices bring bookings, payments, and marketplace operations together.',
-    stack: ['React Native', 'Expo', 'Next.js', 'TypeScript', 'Node.js', 'PostgreSQL', 'Redis', 'GKE'],
-    capabilities: ['Discovery & appointment booking', 'Vendor operations & analytics', 'Payments & subscriptions'],
-    url: 'https://rizzerv.com/',
+    description: 'Live on iOS and Android, Rizzerv runs on 12+ Kubernetes microservices and approximately 175 REST endpoints. I designed its 17-entity PostgreSQL schema, wrote 59 hand-written idempotent migrations, and implemented indexing and Cloud SQL optimisation for Node/Express services with Redis and GCS.',
+    stack: ['React Native', 'Node.js', 'Express', 'PostgreSQL', 'Redis', 'Cloud SQL', 'GCS', 'Kubernetes', 'Razorpay'],
+    capabilities: ['Razorpay payment orchestration and an idempotent webhook state machine', 'Timezone-safe billing', 'Redis slot locks preventing double bookings'],
+    url: 'https://app.rizzerv.com/',
     linkLabel: 'Visit Rizzerv',
+    links: [{label:'Android app',url:'https://play.google.com/store/apps/details?id=com.rizzerv.mobileapp'},{label:'iOS app',url:'https://apps.apple.com/in/app/rizzerv/id6763616795'}],
+  },
+  {
+    id:'inovact', title:'Inovact', category:'ai', eyebrow:'AI hiring platform',
+    summary:'Hiring grounded in the work developers actually create.',
+    description:'I built the opportunities platform for jobs, internships, assignments, submissions and hiring data. I contributed to the Next.js/PostgreSQL/Kafka AI GitHub assessment pipeline, scoring code quality, depth and language fit, serving 10K+ developers and 50K+ repositories. I also built frontend caching and shipped alongside the founder for enterprise clients.',
+    stack:['Next.js','PostgreSQL','Kafka','AI code assessment','Frontend caching'],
+    capabilities:['Jobs, internships and assignment workflows','GitHub code quality, depth and language-fit assessment','Submissions and hiring-data management'],
+    url:'https://opportunities.inovact.in/',linkLabel:'Explore opportunities',
+    links:[{label:'Inovact',url:'https://www.inovact.in/'},{label:'Find on Google Play',url:'https://play.google.com/store/search?q=inovact&c=apps&hl=en_IN'}],
   },
   {
     id: 'beatert',
@@ -43,11 +53,12 @@ export const projects = [
     category: 'platforms',
     eyebrow: 'Backend systems & automation',
     summary: 'The infrastructure behind bookings, conversations, payments, and the workflows between them.',
-    description: 'MeetandMore brings complex product operations into one backend: resource booking, secure messaging, payments, rewards, refunds, and notifications. Queues, pub/sub, and scheduled workflows coordinate background work, while dead-letter queues and fault notifications address failed jobs. The platform also supports QR attendance, administrative controls, and authenticated access.',
-    stack: ['Kafka', 'BullMQ', 'Redis', 'MongoDB', 'Kubernetes', 'OAuth', 'JWT'],
-    capabilities: ['Booking & payment workflows', 'Messaging & notification systems', 'Queues & fault handling'],
-    url: 'https://github.com/dipesh-m12/Advanced-BE---MeetandMore',
-    linkLabel: 'Explore the code',
+    description: 'As a contract Backend Engineer from April 2025 to January 2026, I built fault-tolerant Go microservices on Kubernetes using Kafka, BullMQ, Redis Pub/Sub and MongoDB. I designed Kafka consumer groups and partition strategy, with CI/CD and fault-handling workflows supporting a 99.9% uptime SLO.',
+    stack: ['Go', 'Kubernetes', 'Kafka', 'BullMQ', 'Redis Pub/Sub', 'MongoDB', 'OAuth', 'JWT', 'CI/CD'],
+    capabilities: ['Matching, mutex-based bookings and QR attendance','Refunds, rewards/coupons, chat channels and notifications','Dead letter queues, JWT/OAuth and CI/CD'],
+    url: 'https://www.meetandmore.com/',
+    linkLabel: 'Visit Meetandmore',
+    links:[{label:'iOS app',url:'https://apps.apple.com/in/app/meet-and-more/id6754275503'},{label:'Explore the code',url:'https://github.com/dipesh-m12/Advanced-BE---MeetandMore'}],
   },
   {
     id: 'karuna',
@@ -72,5 +83,13 @@ export const projects = [
     capabilities: ['Selective meeting recordings', 'Transcription & contextual search', 'Summaries & calendar integration'],
     url: 'https://github.com/dipesh-m12/Mumbai-Hacks',
     linkLabel: 'Explore the code',
+  },
+  {
+    id:'samadhan',title:'Samadhan AI EdTech',category:'ai',eyebrow:'ScrollHacks winner · Orkes Conductor',
+    summary:'An AI education project recognised with a ₹10L prize at ScrollHacks.',
+    description:'Samadhan brings AI-assisted learning and a web compiler into an education platform. The project won ScrollHacks (Orkes Conductor), with a ₹10L prize. Its focus is helping learners build and develop solutions of their own.',
+    stack:['React','TypeScript','Tailwind CSS','AI-assisted learning'],
+    capabilities:['AI education experience','Web compiler functionality','Winner, ScrollHacks (Orkes Conductor)'],
+    url:'https://certificate.givemycertificate.com/c/2a86771b-e0d4-47b5-9c0a-7fcdb616a929',linkLabel:'View the certificate',
   },
 ];
